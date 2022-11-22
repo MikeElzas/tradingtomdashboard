@@ -10,8 +10,8 @@ from google.oauth2 import service_account
 from google.cloud import bigquery
 
 client = bigquery.Client()
-PROJECT_ID = os.environ.get("PROJECT_ID")
-DATASET = os.environ.get("DATASET")
+#PROJECT_ID = os.environ.get("PROJECT_ID")
+#DATASET = os.environ.get("DATASET")
 
 credentials = service_account.Credentials.from_service_account_info(
     st.secrets["gcp_service_account"]
@@ -19,7 +19,7 @@ credentials = service_account.Credentials.from_service_account_info(
 
 client = bigquery.Client(credentials= credentials)
 
-dataset_ref = bigquery.DatasetReference(PROJECT_ID, DATASET)
+dataset_ref = bigquery.DatasetReference(st.secrets["PROJECT_ID"], st.secrets["DATASET"])
 table_ref = dataset_ref.table("BTC_USDT")
 table = client.get_table(table_ref)
 
