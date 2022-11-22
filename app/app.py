@@ -32,6 +32,10 @@ This is text""")
 
 data = client.list_rows(table).to_dataframe()
 
+head = data.head()
+
+head
+
 fig = go.Figure(data=[go.Candlestick(x=data["datetime"], open=data['open'], high=data['high'], low=data['low'], close=data['close'])])
 
 fig.update_layout(
