@@ -91,9 +91,9 @@ row2_1, row2_2 = st.columns((2, 1))
 
 with row2_1:
     st.write(
-        f"""**Price development of {ticker} over the past {days_to_plot} days**"""
+        f"""**Total return over invested capital**"""
     )
-    st.plotly_chart(fig, use_container_width=True)
+
 
 
 with row2_2:
@@ -101,3 +101,7 @@ with row2_2:
         f"""**showing the price for {ticker}**"""
     )
     head
+
+
+st.write(f"""**Price development of {ticker} over the past {days_to_plot} days**""" )
+st.plotly_chart(fig, use_container_width=True)
