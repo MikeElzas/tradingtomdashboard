@@ -2,9 +2,20 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+from htbuilder import div, big, h2, styles
+from htbuilder.units import rem
+
+
 
 from google.oauth2 import service_account
 from google.cloud import bigquery
+
+
+#color schemes
+COLOR_RED = "#FF4B4B"
+COLOR_BLUE = "#1C83E1"
+COLOR_CYAN = "#00C0F2"
+
 
 
 #Setting everything up to load in the data
@@ -22,6 +33,27 @@ dataset_ref = bigquery.DatasetReference(st.secrets["PROJECT_ID"], st.secrets["DA
 
 
 
+#Setting up functions to use in variables later
+
+def display_dial(title, value, color):
+        st.markdown(
+            div(
+                style=styles(
+                    text_align="center",
+                    color=color,
+                    padding=(rem(0.8), 0, rem(3), 0),
+                )
+            )(
+                h2(style=styles(font_size=rem(0.8), font_weight=600, padding=0))(title),
+                big(style=styles(font_size=rem(3), font_weight=800, line_height=1))(
+                    value
+                ),
+            ),
+            unsafe_allow_html=True,
+        )
+
+############################################
+
 table_ref_eth = dataset_ref.table("ETH_USDT")
 eth_table = client.get_table(table_ref_eth)
 
@@ -31,7 +63,7 @@ sol_table = client.get_table(table_ref_sol)
 #setting page config
 st.set_page_config(layout="wide", page_title="Trading Tom invester dashboard", page_icon=":rocket:")
 
-row1_1, row1_2 = st.columns((2, 3))
+row1_1, row1_2 = st.columns((2, 2))
 
 with row1_1:
     st.title("Trading Tom invester dashboard")
@@ -86,21 +118,21 @@ fig.update_layout(
 
 )
 
+
 #setting up middle section of the dashboard
-row2_1, row2_2 = st.columns((2, 1))
+
+st.write("## Comparison of invested capital against current return")
+
+row2_1, row2_2, row2_3 = st.columns((3))
 
 with row2_1:
-    st.write(
-        f"""**Total return over invested capital**"""
-    )
-
-
-
+    display_dial("Invested amount", f"100K", COLOR_BLUE)
 with row2_2:
-    st.write(
-        f"""**showing the price for {ticker}**"""
-    )
-    head
+    display_dial("Current amount", f"120K", COLOR_CYAN)
+with row2_3:
+    display_dial(f"% return", f"20%", COLOR_BLUE)
+
+
 
 
 st.write(f"""**Price development of {ticker} over the past {days_to_plot} days**""" )
