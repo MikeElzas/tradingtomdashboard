@@ -4,19 +4,15 @@ import pandas as pd
 import plotly.graph_objects as go
 from htbuilder import div, big, h2, styles
 from htbuilder.units import rem
-
-
+import altair as alt
 
 from google.oauth2 import service_account
 from google.cloud import bigquery
-
 
 #color schemes
 COLOR_RED = "#FF4B4B"
 COLOR_BLUE = "#1C83E1"
 COLOR_CYAN = "#00C0F2"
-
-
 
 #Setting everything up to load in the data
 client = bigquery.Client()
@@ -25,13 +21,6 @@ credentials = service_account.Credentials.from_service_account_info(
 )
 client = bigquery.Client(credentials= credentials)
 dataset_ref = bigquery.DatasetReference(st.secrets["PROJECT_ID"], st.secrets["DATASET"])
-
-
-#Creating variables for all possible data options
-
-##TO-DO MAKE THIS A LOOP TO EVENTUALLY GO OVER ALL TICKERS
-
-
 
 #Setting up functions to use in variables later
 
@@ -54,12 +43,6 @@ def display_dial(title, value, color):
 
 ############################################
 
-table_ref_eth = dataset_ref.table("ETH_USDT")
-eth_table = client.get_table(table_ref_eth)
-
-table_ref_sol = dataset_ref.table("SOL_USDT")
-sol_table = client.get_table(table_ref_sol)
-
 #setting page config
 st.set_page_config(layout="wide", page_title="Trading Tom invester dashboard", page_icon=":rocket:")
 
@@ -68,24 +51,32 @@ row1_1, row1_2 = st.columns((2, 2))
 with row1_1:
     st.title("Trading Tom invester dashboard")
 
-
 with row1_2:
     st.write(
         """
     ##
-   This dashboard highlights the investment amount, return development over time, total return and performance against the S&P500
+   This dashboard highlights the investment amount, return development over time, total return and performance against a benchmark
    for our investors.
    """
     )
 
-
 # choose which ticker is displayed
 ticker = st.sidebar.selectbox(
-    'Ticker to Plot',
-    options = ['BTC_USDT', 'ETH_USDT', 'SOL_USDT']
+    'Coin to Plot',
+    options = ['Bitcoin', 'Ethereum', 'Solana']
 )
 
-table_ref = dataset_ref.table(ticker)
+
+#changing the coin into a ticker
+if ticker == "Bitcoin":
+    ticker_plot = "BTC_USDT"
+elif ticker == "Ethereum":
+    ticker_plot = "ETH_USDT"
+else:
+    ticker_plot = "SOL_USDT"
+
+
+table_ref = dataset_ref.table(ticker_plot)
 table = client.get_table(table_ref)
 
 #choose the amount of days displayed in the chart
@@ -105,6 +96,12 @@ head = data.head()
 #using the slider variabole to determine how much data the chart highlights
 data_chart = data.tail(days_to_plot * 24)
 
+data_chart["return_coin"] = data_chart["close"].pct_change()*100
+data_chart["return_coin_cum"] = data_chart["return_coin"].cumsum()
+data_chart['year_month'] = pd.to_datetime(data_chart['datetime']).dt.strftime('%Y-%m')
+
+
+
 #chart set-up
 fig = go.Figure(data=[go.Candlestick(x=data_chart["datetime"], open=data_chart['open'], high=data_chart['high'], low=data_chart['low'], close=data_chart['close'])])
 
@@ -121,7 +118,7 @@ fig.update_layout(
 
 #setting up middle section of the dashboard
 
-st.write("## Comparison of invested capital against current return")
+st.write("## Overview of invest capital, current capital and the return on capital")
 
 row2_1, row2_2, row2_3 = st.columns((3))
 
@@ -133,7 +130,17 @@ with row2_3:
     display_dial(f"% return", f"20%", COLOR_BLUE)
 
 
+#c = alt.Chart(data_chart).mark_circle().encode(
+ #   x='datetime', y='return_coin_cum', tooltip=['return_coin_cum']).interactive()
+
+c= alt.Chart(data_chart).mark_line().encode(
+    x=alt.X('datetime:T', axis=alt.Axis(tickCount= 12 )),
+    y=alt.Y('return_coin_cum:Q'))
 
 
-st.write(f"""**Price development of {ticker} over the past {days_to_plot} days**""" )
+
+st.write(f"""**Comparison of the portfolio return against the {ticker} return**""")
+st.altair_chart(c, use_container_width= True)
+
+st.write(f"""**Price development of {ticker} over the past {days_to_plot} days**""")
 st.plotly_chart(fig, use_container_width=True)

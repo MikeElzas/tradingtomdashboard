@@ -11,6 +11,7 @@ scikit-learn
 plotly
 db-dtypes
 htbuilder
+altair
 
 # tests/linter
 black
