@@ -98,7 +98,7 @@ data_chart = data.tail(days_to_plot * 24)
 
 data_chart["return_coin"] = data_chart["close"].pct_change()*100
 data_chart["return_coin_cum"] = data_chart["return_coin"].cumsum()
-data_chart['year_month'] = pd.to_datetime(data_chart['datetime']).dt.strftime('%Y-%m')
+data_chart["return_port"] = -2
 
 
 
@@ -133,11 +133,14 @@ with row2_3:
 #c = alt.Chart(data_chart).mark_circle().encode(
  #   x='datetime', y='return_coin_cum', tooltip=['return_coin_cum']).interactive()
 
+#c= alt.Chart(data_chart).mark_line().encode(
+#    x=alt.X('datetime:T', axis=alt.Axis(tickCount= 12 )),
+#    y=alt.Y('return_coin_cum:Q'))
+
 c= alt.Chart(data_chart).mark_line().encode(
     x=alt.X('datetime:T', axis=alt.Axis(tickCount= 12 )),
-    y=alt.Y('return_coin_cum:Q'))
-
-
+    y=alt.Y(alt.repeat("layer"), type= "quantitative"),
+    color=alt.ColorDatum(alt.repeat('layer'))).repeat(layer= ["return_coin_cum", "return_port"])
 
 st.write(f"""**Comparison of the portfolio return against the {ticker} return**""")
 st.altair_chart(c, use_container_width= True)
