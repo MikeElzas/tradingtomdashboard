@@ -130,13 +130,6 @@ with row2_3:
     display_dial(f"% return", f"20%", COLOR_BLUE)
 
 
-#c = alt.Chart(data_chart).mark_circle().encode(
- #   x='datetime', y='return_coin_cum', tooltip=['return_coin_cum']).interactive()
-
-#c= alt.Chart(data_chart).mark_line().encode(
-#    x=alt.X('datetime:T', axis=alt.Axis(tickCount= 12 )),
-#    y=alt.Y('return_coin_cum:Q'))
-
 c= alt.Chart(data_chart).mark_line().encode(
     x=alt.X('datetime:T', axis=alt.Axis(tickCount= 12 )),
     y=alt.Y(alt.repeat("layer"), type= "quantitative"),
